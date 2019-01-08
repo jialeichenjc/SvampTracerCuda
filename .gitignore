@@ -1,0 +1,12 @@
+# general ignored folder
+.vs/
+
+# debug folder
+Debug/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
