@@ -31,7 +31,7 @@ public:
 #define RANDVEC3 vec3(curand_uniform(local_rand_state), curand_uniform(local_rand_state), curand_uniform(local_rand_state))
    
     // rejection method
-    __device__ vec3 random_in_unit_sphere() const {
+    __device__ vec3 random_in_unit_sphere(curandState *local_rand_state) const {
         vec3 p;
         do {
             // generate a vector p whose x, y, z are all in (-1, 1)

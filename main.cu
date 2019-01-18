@@ -99,40 +99,50 @@ __global__ void render(vec3 *fb, int max_x, int max_y, int ns, camera ** cam, hi
     fb[pixel_index] = col;
 }
 
-hitable * random_scene() {
-    int n = 500;
-    hitable ** list = new hitable*[n + 1];
-    list[0] = new sphere(vec3(0, -1000, 0), 1000, new lambertian(vec3(0.5, 0.5, 0.5)));
+#define RND (curand_uniform(&local_rand_state))
 
-    int i = 1;
-    for (int a = -11; a < 11; a++) {
-        for (int b = -11; b < 11; b++) {
-            float choose_mat = util::gen_rand();
-            vec3 center(a + 0.9 * util::gen_rand(), 0.2, b + 0.9 * util::gen_rand());
-            if ((center - vec3(4, 0.2, 0)).length() > 0.9) {
-                if (choose_mat < 0.8) { // diffuse
-                    list[i++] = new sphere(center, 0.2,
-                        new lambertian(
-                            vec3(util::gen_rand() * util::gen_rand(), util::gen_rand() * util::gen_rand(), util::gen_rand() * util::gen_rand())));
-                }
-                else if (choose_mat < 0.95) { // metal
-                    list[i++] = new sphere(center, 0.2,
-                        new metal(
-                            vec3(0.5*(1 + util::gen_rand()), 0.5*(1 + util::gen_rand()), 0.5*(1 + util::gen_rand())), 0.5*util::gen_rand()));
-                }
-                else {
-                    list[i++] = new sphere(center, 0.2, new dielectric(1.5));
-                }
-            }
-        }
+__global__ void create_world(hitable **d_list, hitable **d_world, camera **d_camera, int nx, int ny, curandState *rand_state) {
+    if (threadIdx.x == 0 && blockIdx.x == 0) {
+        curandState local_rand_state = *rand_state;
+        d_list[0] = new sphere(vec3(0, -1000.0, -1), new lambertian(vec3(0.5, 0.5, 0.5)));
+
     }
-
-    list[i++] = new sphere(vec3(0, 1, 0), 1.0, new dielectric(1.5));
-    list[i++] = new sphere(vec3(-4, 1, 0), 1.0, new lambertian(vec3(0.4, 0.2, 0.1)));
-    list[i++] = new sphere(vec3(4, 1, 0), 1.0, new metal(vec3(0.7, 0.6, 0.5), 0.0));
-
-    return new hitable_list(list, i);
 }
+
+//hitable * random_scene() {
+//    int n = 500;
+//    hitable ** list = new hitable*[n + 1];
+//    list[0] = new sphere(vec3(0, -1000, 0), 1000, new lambertian(vec3(0.5, 0.5, 0.5)));
+//
+//    int i = 1;
+//    for (int a = -11; a < 11; a++) {
+//        for (int b = -11; b < 11; b++) {
+//            float choose_mat = util::gen_rand();
+//            vec3 center(a + 0.9 * util::gen_rand(), 0.2, b + 0.9 * util::gen_rand());
+//            if ((center - vec3(4, 0.2, 0)).length() > 0.9) {
+//                if (choose_mat < 0.8) { // diffuse
+//                    list[i++] = new sphere(center, 0.2,
+//                        new lambertian(
+//                            vec3(util::gen_rand() * util::gen_rand(), util::gen_rand() * util::gen_rand(), util::gen_rand() * util::gen_rand())));
+//                }
+//                else if (choose_mat < 0.95) { // metal
+//                    list[i++] = new sphere(center, 0.2,
+//                        new metal(
+//                            vec3(0.5*(1 + util::gen_rand()), 0.5*(1 + util::gen_rand()), 0.5*(1 + util::gen_rand())), 0.5*util::gen_rand()));
+//                }
+//                else {
+//                    list[i++] = new sphere(center, 0.2, new dielectric(1.5));
+//                }
+//            }
+//        }
+//    }
+//
+//    list[i++] = new sphere(vec3(0, 1, 0), 1.0, new dielectric(1.5));
+//    list[i++] = new sphere(vec3(-4, 1, 0), 1.0, new lambertian(vec3(0.4, 0.2, 0.1)));
+//    list[i++] = new sphere(vec3(4, 1, 0), 1.0, new metal(vec3(0.7, 0.6, 0.5), 0.0));
+//
+//    return new hitable_list(list, i);
+//}
 
 int main()
 {
