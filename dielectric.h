@@ -7,7 +7,7 @@
 class dielectric : public material {
 public:
     __device__ dielectric(float ri) : ref_idx(ri) {}
-    __device__ virtual bool scatter(const ray &r_in, const hit_record &rec, vec3 &attenuation, ray &scattered) const {
+    __device__ virtual bool scatter(const ray &r_in, const hit_record &rec, vec3 &attenuation, ray &scattered, curandState *local_rand_state) const {
         vec3 outward_normal;
         vec3 reflected = reflect(r_in.direction(), rec.normal);
         float ni_over_nt;
@@ -37,7 +37,7 @@ public:
         }
 
         // randomly choosing between reflection and refraction, if refraction is possible
-        if (util::gen_rand() < reflect_prob) {
+        if (curand_uniform(local_rand_state) < reflect_prob) {
             scattered = ray(rec.p, reflected);
         }
         else {

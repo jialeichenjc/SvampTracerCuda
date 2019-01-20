@@ -7,7 +7,8 @@
 
 class material {
 public:
-    __device__ virtual bool scatter(const ray &r_in, const hit_record &rec, vec3 &attenuation, ray &scattered) const = 0;
+    __device__ virtual bool scatter(const ray &r_in, const hit_record &rec, vec3 &attenuation, ray &scattered,
+        curandState *local_rand_state) const = 0;
 
     __device__ bool refract(const vec3 &v, const vec3 &n, float ni_over_nt, vec3 &refracted) const {
         vec3 uv = unit_vector(v);
